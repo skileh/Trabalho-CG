@@ -32,7 +32,7 @@ function main() {
     return matrix;
   }
 
-  loadGUI();
+  loadGUI(1);
   
   function render() {
     twgl.resizeCanvasToDisplaySize(gl.canvas);
