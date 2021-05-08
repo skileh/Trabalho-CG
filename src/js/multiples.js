@@ -33,11 +33,6 @@ void main() {
 }
 `;
 
-var val=0;
-var count=0;
-var index=0;
-var isCreate = false;
-var isRemove = false;
 function main() {
   // Get A WebGL context
   /** @type {HTMLCanvasElement} */
@@ -50,23 +45,61 @@ function main() {
   // Tell the twgl to match position with a_position, n
   // normal with a_normal etc..
   twgl.setAttributePrefix("a_");
+
+  var sphereBufferInfo = flattenedPrimitives.createSphereBufferInfo(gl, 10, 12, 6);
+  var cubeBufferInfo   = flattenedPrimitives.createCubeBufferInfo(gl, 20);
+  var coneBufferInfo   = flattenedPrimitives.createTruncatedConeBufferInfo(gl, 10, 0, 20, 12, 1, true, false);
+
   // setup GLSL program
   var programInfo = twgl.createProgramInfo(gl, [vs, fs]);
+
+  var sphereVAO = twgl.createVAOFromBufferInfo(gl, programInfo, sphereBufferInfo);
+  var cubeVAO   = twgl.createVAOFromBufferInfo(gl, programInfo, cubeBufferInfo);
+  var coneVAO   = twgl.createVAOFromBufferInfo(gl, programInfo, coneBufferInfo);
 
   function degToRad(d) {
     return d * Math.PI / 180;
   }
 
-
   var fieldOfViewRadians = degToRad(60);
 
   // Uniforms for each object.
-  var coneUniforms = [];
-  var coneTranslation =[];
-  var coneYRotation=[];
-  var coneXRotation=[];
+  var sphereUniforms = {
+    u_colorMult: [0.5, 1, 0.5, 1],
+    u_matrix: m4.identity(),
+  };
+  var cubeUniforms = {
+    u_colorMult: [1, 0.5, 0.5, 1],
+    u_matrix: m4.identity(),
+  };
+  var coneUniforms = {
+    u_colorMult: [0.5, 0.5, 1, 1],
+    u_matrix: m4.identity(),
+  };
+  var sphereTranslation = [  0, 0, 0];
+  var cubeTranslation   = [-40, 0, 0];
+  var coneTranslation   = [ 40, 0, 0];
 
-  var objectsToDraw = [];
+  var objectsToDraw = [
+    {
+      programInfo: programInfo,
+      bufferInfo: sphereBufferInfo,
+      vertexArray: sphereVAO,
+      uniforms: sphereUniforms,
+    },
+    {
+      programInfo: programInfo,
+      bufferInfo: cubeBufferInfo,
+      vertexArray: cubeVAO,
+      uniforms: cubeUniforms,
+    },
+    {
+      programInfo: programInfo,
+      bufferInfo: coneBufferInfo,
+      vertexArray: coneVAO,
+      uniforms: coneUniforms,
+    },
+  ];
 
   function computeMatrix(viewProjectionMatrix, translation, xRotation, yRotation) {
     var matrix = m4.translate(viewProjectionMatrix,
@@ -76,8 +109,9 @@ function main() {
     matrix = m4.xRotate(matrix, xRotation);
     return m4.yRotate(matrix, yRotation);
   }
-  loadGUI(objectsToDraw);
+
   requestAnimationFrame(drawScene);
+
   // Draw the scene.
   function drawScene(time) {
     time = time * 0.0005;
@@ -106,65 +140,34 @@ function main() {
 
     var viewProjectionMatrix = m4.multiply(projectionMatrix, viewMatrix);
 
-    if(val == 0){
-      coneTranslation[count-1] = [
-                        config.x_translation,
-                        config.y_translation,
-                        config.z_translation
-                        ];
-      coneXRotation[count-1] =  config.x_rotate;
-      coneYRotation[count-1] =  config.y_rotate;
-
-    }
-    if(isCreate){
-
-      var coneUniformss =
-        {
-          u_colorMult: [time, -time, 1, 1],
-          u_matrix: m4.identity(),
-        };
-      coneTranslation.push([ 0, 0, 0]);
-      coneYRotation.push(0);
-      coneXRotation.push(0);
-      var coneBufferInfos   = flattenedPrimitives.createTruncatedConeBufferInfo(gl, 10, 0, 20, 12, 1, true, false);
-
-      // setup GLSL program
-
-      var coneVAOs   = twgl.createVAOFromBufferInfo(gl, programInfo, coneBufferInfos);
-      objectsToDraw.push({
-          programInfo: programInfo,
-          bufferInfo: coneBufferInfos,
-          vertexArray: coneVAOs,
-          uniforms: coneUniformss,
-      });
-      isCreate = false;
-      console.log(objectsToDraw);
-    }
-
-    if(isRemove){
-      if(count == 1){
-        isRemove=false;
-      }
-      else{
-        objectsToDraw.splice(0,1);
-        isRemove=false;
-        count -=1;
-      }
-    }
+    var sphereXRotation =  time;
+    var sphereYRotation =  time;
+    var cubeXRotation   = -time;
+    var cubeYRotation   =  time;
+    var coneXRotation   =  time;
+    var coneYRotation   = -time;
 
     // Compute the matrices for each object.
-    var c=0;
-    objectsToDraw.forEach(function(object) {
-
-      object.uniforms.u_matrix = computeMatrix(
+    sphereUniforms.u_matrix = computeMatrix(
         viewProjectionMatrix,
-        coneTranslation[c],
-        coneXRotation[c],
-        coneYRotation[c]);
-      c +=1;
-    });
+        sphereTranslation,
+        sphereXRotation,
+        sphereYRotation);
+
+    cubeUniforms.u_matrix = computeMatrix(
+        viewProjectionMatrix,
+        cubeTranslation,
+        cubeXRotation,
+        cubeYRotation);
+
+    coneUniforms.u_matrix = computeMatrix(
+        viewProjectionMatrix,
+        coneTranslation,
+        coneXRotation,
+        coneYRotation);
 
     // ------ Draw the objects --------
+
     objectsToDraw.forEach(function(object) {
       var programInfo = object.programInfo;
 
@@ -175,12 +178,12 @@ function main() {
 
       // Set the uniforms we just computed
       twgl.setUniforms(programInfo, object.uniforms);
+
       twgl.drawBufferInfo(gl, object.bufferInfo);
     });
 
     requestAnimationFrame(drawScene);
   }
 }
-
 
 main();
