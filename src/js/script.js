@@ -105,11 +105,21 @@ function main() {
     var viewMatrix = m4.inverse(cameraMatrix);
 
     var viewProjectionMatrix = m4.multiply(projectionMatrix, viewMatrix);
+    var t = config.beizer_translation;
+    var invT = (1 - t)
+    var Px = ((-60) * invT *invT *invT) +
+        ((-60) * 3 * t * invT *invT )+
+        (50 * 3 * invT * t * t)+
+        (50 * t * t * t);
+    var Py= ((-30) * invT *invT *invT )+
+        (30 * 3 * t * invT *invT )+
+       ( 30 * 3 * invT * t * t )+
+        ((-30) * t * t * t);
 
     if(val == 0){
       coneTranslation[count-1] = [
-                        config.x_translation,
-                        config.y_translation,
+                        Px,
+                        Py,
                         config.z_translation
                         ];
       coneXRotation[count-1] =  config.x_rotate;
