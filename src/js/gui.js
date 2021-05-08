@@ -1,15 +1,17 @@
 var config = { y_rotate: degToRad(0),  x_rotate: degToRad(0), z_rotate: degToRad(0),
 				y_translation: degToRad(0),  x_translation: degToRad(0), z_translation: degToRad(0)};
-var obj = { Add_new_object:function(){ loadGUI(2) }};
 
+var button = { Add_new_object:function(){ render() }};
+
+var select = { Select_Object:function(){ 'dat.gui' }};
 
 const loadGUI = (val) => {
 
 
   const gui = new dat.GUI();
-  if(val == 1){
-    gui.add(obj, 'Add_new_object');
-  }
+  gui.add(button, 'Add_new_object');
+
+  gui.add(select, 'Select_Object', [ 'pizza', 'chrome', 'hooray' ] )
 
   const rotate = gui.addFolder('Rotação no eixo');
   rotate.add(config, "y_rotate", 0, 20, 0.5);
