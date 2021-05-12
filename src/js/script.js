@@ -1,5 +1,6 @@
 "use strict";
 
+//códigos rodando dentro da GpU
 var vs = `#version 300 es
 
 in vec4 a_position;
@@ -50,8 +51,10 @@ function main() {
   // Tell the twgl to match position with a_position, n
   // normal with a_normal etc..
   twgl.setAttributePrefix("a_");
-  // setup GLSL program
+  // setup GLSL program,
+  var coneBufferInfos   = flattenedPrimitives.createTruncatedConeBufferInfo(gl, 10, 0, 20, 12, 1, true, false);
   var programInfo = twgl.createProgramInfo(gl, [vs, fs]);
+  var coneVAOs   = twgl.createVAOFromBufferInfo(gl, programInfo, coneBufferInfos);
 
   function degToRad(d) {
     return d * Math.PI / 180;
@@ -78,6 +81,7 @@ function main() {
     matrix = m4.zRotate(matrix,zRotation);
     return m4.yRotate(matrix, yRotation);
   }
+
   loadGUI(objectsToDraw);
   requestAnimationFrame(drawScene);
   // Draw the scene.
@@ -161,15 +165,12 @@ function main() {
       coneXRotation.push(0);
       coneZRotation.push(0);
       coneBezier.push(0);
-      var coneBufferInfos   = flattenedPrimitives.createTruncatedConeBufferInfo(gl, 10, 0, 20, 12, 1, true, false);
+     
 
       // setup GLSL program
 
-      var coneVAOs   = twgl.createVAOFromBufferInfo(gl, programInfo, coneBufferInfos);
       objectsToDraw.push({
-          programInfo: programInfo,
           bufferInfo: coneBufferInfos,
-          vertexArray: coneVAOs,
           uniforms: coneUniformss,
       });
       isCreate = false;
@@ -177,11 +178,19 @@ function main() {
     }
 
     if(isRemove){
+      //sempre deixa apenas 1 objeto na tela
       if(count == 1){
         isRemove=false;
       }
       else{
+        //remove o ultimo objeto inserido
         objectsToDraw.splice(0,1);
+        coneTranslation.splice(0,1);
+        coneYRotation.splice(0,1);
+        coneXRotation.splice(0,1);
+        coneZRotation.splice(0,1);
+        coneBezier.splice(0,1);
+        console.log(objectsToDraw.length)
         isRemove=false;
         count -=1;
       }
@@ -200,15 +209,14 @@ function main() {
       c +=1;
     });
 
+      // Setup all the needed attributes.
+    // desenha 1 cone \  malha que vai ser utilizada
+    gl.bindVertexArray(coneVAOs);
+    // programa que será utilizado
+    gl.useProgram(programInfo.program);
+
     // ------ Draw the objects --------
     objectsToDraw.forEach(function(object) {
-      var programInfo = object.programInfo;
-
-      gl.useProgram(programInfo.program);
-
-      // Setup all the needed attributes.
-      gl.bindVertexArray(object.vertexArray);
-
       // Set the uniforms we just computed
       twgl.setUniforms(programInfo, object.uniforms);
       twgl.drawBufferInfo(gl, object.bufferInfo);
