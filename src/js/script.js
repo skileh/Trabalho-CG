@@ -46,7 +46,7 @@ function main() {
   if (!gl) {
     return;
   }
-
+  var aux, auy;
   // Tell the twgl to match position with a_position, n
   // normal with a_normal etc..
   twgl.setAttributePrefix("a_");
@@ -57,23 +57,25 @@ function main() {
     return d * Math.PI / 180;
   }
 
-
   var fieldOfViewRadians = degToRad(60);
 
   // Uniforms for each object.
   var coneUniforms = [];
   var coneTranslation =[];
+  var coneBezier =[];
   var coneYRotation=[];
   var coneXRotation=[];
+  var coneZRotation=[];
 
   var objectsToDraw = [];
 
-  function computeMatrix(viewProjectionMatrix, translation, xRotation, yRotation) {
+  function computeMatrix(viewProjectionMatrix, translation, xRotation, yRotation, zRotation) {
     var matrix = m4.translate(viewProjectionMatrix,
         translation[0],
         translation[1],
         translation[2]);
     matrix = m4.xRotate(matrix, xRotation);
+    matrix = m4.zRotate(matrix,zRotation);
     return m4.yRotate(matrix, yRotation);
   }
   loadGUI(objectsToDraw);
@@ -105,27 +107,48 @@ function main() {
     var viewMatrix = m4.inverse(cameraMatrix);
 
     var viewProjectionMatrix = m4.multiply(projectionMatrix, viewMatrix);
-    var t = config.beizer_translation;
-    var invT = (1 - t)
-    var Px = ((-60) * invT *invT *invT) +
-        ((-60) * 3 * t * invT *invT )+
-        (50 * 3 * invT * t * t)+
-        (50 * t * t * t);
-    var Py= ((-30) * invT *invT *invT )+
-        (30 * 3 * t * invT *invT )+
-       ( 30 * 3 * invT * t * t )+
-        ((-30) * t * t * t);
+    
+    
+   
+      
+      if(coneTranslation[count-1] !=[
+                        config.x_translation,
+                        config.y_translation,
+                        config.z_translation
+                        ]   ){
+        coneTranslation[count-1] = [
+                        config.x_translation,
+                        config.y_translation,
+                        config.z_translation
+                        ];
+                      
 
-    if(val == 0){
-      coneTranslation[count-1] = [
+      }
+
+      if(coneBezier[count-1]!=config.beizer_translation){
+        var t = config.beizer_translation;
+        var invT = (1 - t)
+        var Px = ((-60) * invT *invT *invT) +
+            ((-60) * 3 * t * invT *invT )+
+            (50 * 3 * invT * t * t)+
+            (50 * t * t * t);
+        var Py= ((-30) * invT *invT *invT )+
+            (30 * 3 * t * invT *invT )+
+           ( 30 * 3 * invT * t * t )+
+            ((-30) * t * t * t);
+        coneTranslation[count-1] = [
                         Px,
                         Py,
                         config.z_translation
                         ];
+        config.x_translation=Px;
+        config.y_translation=Py;
+        coneBezier[count-1] = config.beizer_translation;
+      }
       coneXRotation[count-1] =  config.x_rotate;
       coneYRotation[count-1] =  config.y_rotate;
+      coneZRotation[count-1] =  config.z_rotate;
 
-    }
     if(isCreate){
 
       var coneUniformss =
@@ -136,6 +159,8 @@ function main() {
       coneTranslation.push([ 0, 0, 0]);
       coneYRotation.push(0);
       coneXRotation.push(0);
+      coneZRotation.push(0);
+      coneBezier.push(0);
       var coneBufferInfos   = flattenedPrimitives.createTruncatedConeBufferInfo(gl, 10, 0, 20, 12, 1, true, false);
 
       // setup GLSL program
@@ -165,12 +190,13 @@ function main() {
     // Compute the matrices for each object.
     var c=0;
     objectsToDraw.forEach(function(object) {
-
       object.uniforms.u_matrix = computeMatrix(
-        viewProjectionMatrix,
-        coneTranslation[c],
-        coneXRotation[c],
-        coneYRotation[c]);
+          viewProjectionMatrix,
+          coneTranslation[c],
+          coneXRotation[c],
+          coneYRotation[c],
+          coneZRotation[c]);
+      
       c +=1;
     });
 
