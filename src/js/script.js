@@ -47,7 +47,8 @@ function bezier(t, p1, p2, p3, p4) {
 
   return [px, py];
 }
-
+var camCreate = false;
+var camSelect = 0;
 var isCreate = false;
 var isRemove = false;
 function main() {
@@ -78,7 +79,7 @@ function main() {
 
   //armazena posições da translação bezier
   var positions = [];
-  
+
   //Atributos dos objetos
   var coneTranslation = [];
   var coneBezier = []; //armazena a translação bezier do cone
@@ -91,13 +92,15 @@ function main() {
   var objectsToDraw = [];
 
   //Atributo das cameras
-  const cameraPosition = [
-    config.cam1PosX=0,
-    config.cam1PosY=0,
-    config.cam1PosZ=100,
-  ];
+  const cameraPosition = [[
+    config.camPosX = 0,
+    config.camPosY = 0,
+    config.camPosZ = 100,
+    config.camBezier = 0
+  ]];
   var target = [0, 0, 0];
   var up = [0, 1, 0];
+
 
   //
   function computeMatrix(viewProjectionMatrix, translation, xRotation, yRotation, zRotation, xScale, yScale, zSacale) {
@@ -111,7 +114,7 @@ function main() {
     return m4.yRotate(matrix, yRotation);
   }
 
-  loadGUI();
+  var gui = loadGUI();
   requestAnimationFrame(drawScene);
   // Draw the scene.
   function drawScene(time) {
@@ -131,12 +134,18 @@ function main() {
       m4.perspective(fieldOfViewRadians, aspect, 1, 2000);
 
     // Compute the camera's matrix using look at.
-    const cameraPosition = [
-      config.cam1PosX,
-      config.cam1PosY,
-      config.cam1PosZ,
+    if (camCreate) {
+      cameraPosition.push([0, 0, 100, 0])
+    }
+    cameraPosition[camSelect] = [
+      config.camPosX,
+      config.camPosY,
+      config.camPosZ,
+      config.camBezier
     ];
-    var cameraMatrix = m4.lookAt(cameraPosition, target, up);
+
+    //if (coneBezier[objectsToDraw.length - 1] != config.camBezier) {
+    var cameraMatrix = m4.lookAt(cameraPosition[camSelect], target, up);
 
     // Make a view matrix from the camera matrix.
     var viewMatrix = m4.inverse(cameraMatrix);
@@ -228,23 +237,22 @@ function main() {
 
     //verifica se um objeto deve ser criado
     if (isCreate) {
-
+      refreshGUI(gui);
       var coneUniformss =
       {
         u_colorMult: [time, -time, 1, 1],
         u_matrix: m4.identity(),
       };
-      coneTranslation.push([0, 0, 0]);
-      coneYRotation.push(0);
-      coneXRotation.push(0);
-      coneZRotation.push(0);
-      coneXScale.push(1);
-      coneZScale.push(1);
-      coneYScale.push(1);
-      coneBezier.push(0);
-      config.x_scale = 0.5;
-      config.z_scale = 0.5;
-      config.y_scale = 0.5;
+      coneTranslation.push([config.y_translation = 0,
+          config.x_translation = 0,
+          config.z_translation = 0]);
+      coneYRotation.push(config.y_rotate = 0);
+      coneXRotation.push(config.x_rotate = 0);
+      coneZRotation.push(config.z_rotate = 0);
+      coneXScale.push(config.x_scale = 0.5);
+      coneZScale.push(config.z_scale = 0.5);
+      coneYScale.push(config.y_scale = 0.5);
+      coneBezier.push(config.beizer_translation);
 
 
       // setup GLSL program
@@ -258,6 +266,7 @@ function main() {
     }
 
     if (isRemove) {
+      refreshGUI(gui);
       //sempre deixa apenas 1 objeto na tela
       if (objectsToDraw.length == 1) {
         isRemove = false;
@@ -269,13 +278,6 @@ function main() {
         coneYRotation.splice(0, 1);
         coneXRotation.splice(0, 1);
         coneZRotation.splice(0, 1);
-        config.x_translation = 0;
-        config.y_translation = 0;
-        config.z_translation = 0;
-        config.x_rotate = 0;
-        config.y_rotate = 0;
-        config.z_rotate = 0;
-        config.beizer_translation = 0;
         coneBezier.splice(0, 1);
         console.log(objectsToDraw.length)
         isRemove = false;
