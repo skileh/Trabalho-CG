@@ -51,6 +51,7 @@ var camCreate = false;
 var camSelect = 0;
 var isCreate = false;
 var isRemove = false;
+var tipoCamera;
 function main() {
   // Get A WebGL context
   /** @type {HTMLCanvasElement} */
@@ -92,11 +93,11 @@ function main() {
   var objectsToDraw = [];
 
   //Atributo das cameras
+  var camBezier = 0;
   const cameraPosition = [[
     config.camPosX = 0,
     config.camPosY = 0,
-    config.camPosZ = 100,
-    config.camBezier = 0
+    config.camPosZ = 100
   ]];
   var target = [0, 0, 0];
   var up = [0, 1, 0];
@@ -135,17 +136,66 @@ function main() {
 
     // Compute the camera's matrix using look at.
     if (camCreate) {
-      cameraPosition.push([0, 0, 100, 0])
+      cameraPosition.push([0, 0, 100])
     }
     cameraPosition[camSelect] = [
       config.camPosX,
       config.camPosY,
-      config.camPosZ,
-      config.camBezier
+      config.camPosZ
     ];
 
-    //if (coneBezier[objectsToDraw.length - 1] != config.camBezier) {
+    if (camBezier != config.camBezier) {
+      positions = bezier(config.camBezier,
+        [-100, -70],
+        [-100, 70],
+        [80, 70],
+        [80, -70]);
+      cameraPosition[camSelect] = [
+        positions[0],
+        positions[1],
+        config.camPosZ
+      ];
+      camBezier = config.camBezier;
+      config.camPosX = positions[0];
+      config.camPosY = positions[1];
+      refreshGUI(gui);
+    }
     var cameraMatrix = m4.lookAt(cameraPosition[camSelect], target, up);
+
+    if (tipoCamera == 'Translação') {
+      cameraMatrix = m4.translate(cameraMatrix, config.camPosX,
+        config.camPosY,
+        config.camPosZ);
+    }
+    else if (tipoCamera == 'Look At objeto') {
+      target = [config.x_translation, config.y_translation, 0];
+      cameraPosition[camSelect][config.x_translation, config.y_translation, config.z_translation];
+      cameraMatrix = m4.lookAt(cameraPosition[camSelect], target, up);
+    }
+    else if (tipoCamera == 'Zoom') {
+      tipoCamera = 'Zoom';
+    }
+    else if (tipoCamera == 'Look At ponto 0,0,0') {
+      target = [0, 0, 0];
+      cameraMatrix = m4.lookAt(cameraPosition[camSelect], target, up);
+    }
+    else if (tipoCamera == 'animação') {
+      tipoCamera = 'animação';
+    }
+    else if (tipoCamera == 'Rotação Ponto') {
+      target=[-50, 40, 0];
+      cameraMatrix = m4.lookAt(cameraPosition[camSelect], target, up);
+    }
+    else if (tipoCamera == 'Rotação Eixo') {
+      target = [0,0,0];
+      cameraMatrix = m4.lookAt(cameraPosition[camSelect], target, up);
+    }
+    else {
+      cameraMatrix = m4.lookAt(cameraPosition[camSelect], target, up);
+    }
+    cameraMatrix = m4.xRotate(cameraMatrix,degToRad(config.camRotX));
+    cameraMatrix = m4.yRotate(cameraMatrix,degToRad(config.camRotY));
+    cameraMatrix = m4.zRotate(cameraMatrix,degToRad(config.camRotZ));
 
     // Make a view matrix from the camera matrix.
     var viewMatrix = m4.inverse(cameraMatrix);
@@ -244,8 +294,8 @@ function main() {
         u_matrix: m4.identity(),
       };
       coneTranslation.push([config.y_translation = 0,
-          config.x_translation = 0,
-          config.z_translation = 0]);
+      config.x_translation = 0,
+      config.z_translation = 0]);
       coneYRotation.push(config.y_rotate = 0);
       coneXRotation.push(config.x_rotate = 0);
       coneZRotation.push(config.z_rotate = 0);
