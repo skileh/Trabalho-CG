@@ -46,7 +46,7 @@ const loadGUI = () => {
   scale.add(config, "z_scale", 0, 10, 0.01);
 
   barDepthController = gui.add(config, 'barDirection',
-    ['Translação','Look At objeto', 'Zoom' , 'Look At Ponto 0,0,0', 
+    ['Translação','Look At objeto', 'Look At Ponto 0,0,0', 
     'animação', 'Rotação Ponto','Rotação Eixo'])
     .name('Objetivo Camêra')
     .listen();
@@ -68,25 +68,22 @@ const loadGUI = () => {
       config.camPosY=0;
       refreshGUI(gui)
       if(newValue=='Translação'){
-        tipoCamera='Translação';
+        camTrans='Translação';
       }
       else if(newValue=='Look At objeto'){
-        tipoCamera='Look At objeto';
-      }
-      else if(newValue=='Zoom'){
-        tipoCamera='Zoom';
+        camTrans='Look At objeto';
       }
       else if(newValue=='Look At Ponto 0,0,0'){
-        tipoCamera='Look At Ponto 0,0,0';
+        camTrans='Look At Ponto 0,0,0';
       }
       else if(newValue=='animação'){
-        tipoCamera='animação';
+        camTrans='animação';
       }
       else if(newValue=='Rotação Ponto'){
-        tipoCamera='Rotação Ponto';
+        camTrans='Rotação Ponto';
       }
       else if(newValue=='Rotação Eixo'){
-        tipoCamera='Rotação Eixo';
+        camTrans='Rotação Eixo';
       }
       else{
        // console.log('error');
