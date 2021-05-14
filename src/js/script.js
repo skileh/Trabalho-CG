@@ -34,6 +34,7 @@ void main() {
 }
 `;
 
+//calculo para curva de bezier
 function bezier(t, p1, p2, p3, p4) {
   var invT = (1 - t)
   var px = ((p1[0]) * invT * invT * invT) +
@@ -47,6 +48,50 @@ function bezier(t, p1, p2, p3, p4) {
 
   return [px, py];
 }
+
+//Esta função possui o calculo das posições da camera / rotação e animação da mesma
+function camMatrix(cameraPosition,target,up){
+  var cameraMatrix = m4.lookAt(cameraPosition[camSelect], target, up);
+
+    if (tipoCamera == 'Translação') {
+      cameraMatrix = m4.translate(cameraMatrix, config.camPosX,
+        config.camPosY,
+        config.camPosZ);
+    }
+    else if (tipoCamera == 'Look At objeto') {
+      target = [config.x_translation, config.y_translation, 0];
+      cameraPosition[camSelect][config.x_translation, config.y_translation, config.z_translation];
+      cameraMatrix = m4.lookAt(cameraPosition[camSelect], target, up);
+    }
+    else if (tipoCamera == 'Look At ponto 0,0,0') {
+      target = [0, 0, 0];
+      cameraMatrix = m4.lookAt(cameraPosition[camSelect], target, up);
+    }
+    else if (tipoCamera == 'animação') {
+      tipoCamera = 'animação';
+    }
+    else if (tipoCamera == 'Rotação Ponto') {
+      target=[-50, 40, 0];
+      cameraMatrix = m4.lookAt(cameraPosition[camSelect], target, up);
+    }
+    else if (tipoCamera == 'Rotação Eixo') {
+      target = [0,0,0];
+      cameraMatrix = m4.lookAt(cameraPosition[camSelect], target, up);
+    }
+    else {
+      cameraMatrix = m4.lookAt(cameraPosition[camSelect], target, up);
+    }
+
+    cameraMatrix = m4.xRotate(cameraMatrix,degToRad(config.camRotX));
+    cameraMatrix = m4.yRotate(cameraMatrix,degToRad(config.camRotY));
+    cameraMatrix = m4.zRotate(cameraMatrix,degToRad(config.camRotZ));
+    cameraMatrix = m4.scale(cameraMatrix,
+      config.zoom,
+      config.zoom,
+      1);
+    return cameraMatrix;
+}
+
 var camCreate = false;
 var camSelect = 0;
 var isCreate = false;
@@ -101,7 +146,6 @@ function main() {
   ]];
   var target = [0, 0, 0];
   var up = [0, 1, 0];
-
 
   //
   function computeMatrix(viewProjectionMatrix, translation, xRotation, yRotation, zRotation, xScale, yScale, zSacale) {
@@ -160,43 +204,9 @@ function main() {
       config.camPosY = positions[1];
       refreshGUI(gui);
     }
-    var cameraMatrix = m4.lookAt(cameraPosition[camSelect], target, up);
 
-    if (tipoCamera == 'Translação') {
-      cameraMatrix = m4.translate(cameraMatrix, config.camPosX,
-        config.camPosY,
-        config.camPosZ);
-    }
-    else if (tipoCamera == 'Look At objeto') {
-      target = [config.x_translation, config.y_translation, 0];
-      cameraPosition[camSelect][config.x_translation, config.y_translation, config.z_translation];
-      cameraMatrix = m4.lookAt(cameraPosition[camSelect], target, up);
-    }
-    else if (tipoCamera == 'Zoom') {
-      tipoCamera = 'Zoom';
-    }
-    else if (tipoCamera == 'Look At ponto 0,0,0') {
-      target = [0, 0, 0];
-      cameraMatrix = m4.lookAt(cameraPosition[camSelect], target, up);
-    }
-    else if (tipoCamera == 'animação') {
-      tipoCamera = 'animação';
-    }
-    else if (tipoCamera == 'Rotação Ponto') {
-      target=[-50, 40, 0];
-      cameraMatrix = m4.lookAt(cameraPosition[camSelect], target, up);
-    }
-    else if (tipoCamera == 'Rotação Eixo') {
-      target = [0,0,0];
-      cameraMatrix = m4.lookAt(cameraPosition[camSelect], target, up);
-    }
-    else {
-      cameraMatrix = m4.lookAt(cameraPosition[camSelect], target, up);
-    }
-    cameraMatrix = m4.xRotate(cameraMatrix,degToRad(config.camRotX));
-    cameraMatrix = m4.yRotate(cameraMatrix,degToRad(config.camRotY));
-    cameraMatrix = m4.zRotate(cameraMatrix,degToRad(config.camRotZ));
-
+    // chamada da função calculo da camera
+    var cameraMatrix = camMatrix(cameraPosition,target,up);
     // Make a view matrix from the camera matrix.
     var viewMatrix = m4.inverse(cameraMatrix);
 

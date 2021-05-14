@@ -6,6 +6,7 @@ var config = {
   camPosX: degToRad(0), camPosY: degToRad(0), camPosZ: degToRad(0),
   camBezier: degToRad(0), barDirection: degToRad(0),
   camRotX: degToRad(0), camRotY: degToRad(0), camRotZ: degToRad(0),
+  zoom: degToRad(0)
 };
 
 var button1 = { Add_new_object: function () { isCreate = true } };
@@ -22,6 +23,9 @@ function refreshGUI(gui) {
 
 const loadGUI = () => {
   const gui = new dat.GUI();
+  config.zoom=1
+  gui.add(config, "zoom", 0.0001, 5, 0.0001);
+
   gui.add(button1, 'Add_new_object');
   gui.add(button2, 'remove_obj');
 
