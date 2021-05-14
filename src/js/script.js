@@ -1,4 +1,5 @@
 "use strict";
+"use cam.js";
 
 //códigos rodando dentro da GpU
 var vs = `#version 300 es
@@ -34,74 +35,6 @@ void main() {
 }
 `;
 
-//calculo para curva de bezier
-function bezier(t, p1, p2, p3, p4) {
-  var invT = (1 - t)
-  var px = ((p1[0]) * invT * invT * invT) +
-    ((p2[0]) * 3 * t * invT * invT) +
-    (p3[0] * 3 * invT * t * t) +
-    (p4[0] * t * t * t);
-  var py = ((p1[1]) * invT * invT * invT) +
-    (p2[1] * 3 * t * invT * invT) +
-    (p3[1] * 3 * invT * t * t) +
-    ((p4[1]) * t * t * t);
-
-  return [px, py];
-}
-
-//Esta função possui o calculo das posições da camera / rotação e zoom da mesma
-function camMatrix(cameraPosition, target, up) {
-  var cameraMatrix;
-  if (camTrans == 'Translação') {
-    cameraMatrix = m4.translation(config.camPosX,
-      config.camPosY,
-      config.camPosZ);
-  }
-  else if (camTrans == 'Look At objeto') {
-    target = [config.x_translation, config.y_translation, 0];
-    cameraPosition[camSelect] = [config.camPosX, config.camPosY, 200 - config.camPosZ];
-    cameraMatrix = m4.lookAt(cameraPosition[camSelect], target, up);
-  }
-  else if (camTrans == 'Look At ponto 0,0,0') {
-    target = [0, 0, 0];
-    cameraMatrix = m4.lookAt(cameraPosition[camSelect], target, up);
-  }
-  else if (camTrans == 'animação') {
-    camTrans = 'animação';
-  }
-  // faz uma matriz que gira a câmera em torno do raio de origem * 1,5 distância para fora e olhando para a origem.
-  else if (camTrans == 'Rotação Ponto') {
-    //gira em torno do ponto onde está o objeto selecionado
-    cameraMatrix = m4.xRotation(degToRad(config.camRotX));
-    cameraMatrix = m4.yRotate(cameraMatrix, degToRad(config.camRotY));
-    cameraMatrix = m4.zRotate(cameraMatrix, degToRad(config.camRotZ));
-    cameraMatrix = m4.translate(cameraMatrix, config.x_translation, config.y_translation, 100 * 1.5);
-  }
-  else if (camTrans == 'Rotação Eixo') {
-    cameraMatrix = m4.xRotation(degToRad(config.camRotX));
-    cameraMatrix = m4.yRotate(cameraMatrix, degToRad(config.camRotY));
-    cameraMatrix = m4.zRotate(cameraMatrix, degToRad(config.camRotZ));
-    //gira em torno de x=0 e y=0
-    cameraMatrix = m4.translate(cameraMatrix, 0, 0, 100 * 1.5);
-  }
-  else {
-    cameraMatrix = m4.lookAt(cameraPosition[camSelect], target, up);
-  }
-
-  cameraMatrix = m4.scale(cameraMatrix,
-    config.zoom,
-    config.zoom,
-    1);
-
-  return cameraMatrix;
-}
-
-var camCreate = false;
-var camSelect = 0;
-var isCreate = false;
-var isRemove = false;
-var camTrans;
-var camRot;
 function main() {
   // Get A WebGL context
   /** @type {HTMLCanvasElement} */
@@ -167,8 +100,15 @@ function main() {
   var gui = loadGUI();
   requestAnimationFrame(drawScene);
   // Draw the scene.
-  function drawScene(time) {
+  var then = 0;
+  function drawScene(time,now) {
     time = time * 0.0005;
+    // Convert to seconds
+    now *= 0.001;
+    // Subtract the previous time from the current time
+    var deltaTime = now - then;
+    // Remember the current time for the next frame.
+    then = now;
 
     twgl.resizeCanvasToDisplaySize(gl.canvas);
 
@@ -212,54 +152,11 @@ function main() {
     }
 
     // chamada da função calculo da camera
-    var cameraMatrix = camMatrix(cameraPosition, target, up);
+    var cameraMatrix = camMatrix(cameraPosition, target, up, deltaTime);
     // Make a view matrix from the camera matrix.
     var viewMatrix = m4.inverse(cameraMatrix);
 
     var viewProjectionMatrix = m4.multiply(projectionMatrix, viewMatrix);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     // verifica se o slice de translação foi modificado
     if (coneTranslation[objectsToDraw.length - 1] != [
