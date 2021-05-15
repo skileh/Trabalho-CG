@@ -6,11 +6,11 @@ var config = {
   camPosX: degToRad(0), camPosY: degToRad(0), camPosZ: degToRad(0),
   camBezier: degToRad(0), barDirection: degToRad(0),
   camRotX: degToRad(0), camRotY: degToRad(0), camRotZ: degToRad(0),
-  zoom: degToRad(0)
+  zoom: degToRad(0), velDelta:degToRad(0), animation:function(){ animation=true; }
 };
 
-var button1 = { Add_new_object: function () { isCreate = true } };
-var button2 = { remove_obj: function () { isRemove = true } };
+var button1 = { Add_new_object: function () { isCreate = true; } };
+var button2 = { remove_obj: function () { isRemove = true; } };
 
 function refreshGUI(gui) {
   for (var i = 0; i < Object.keys(gui.__folders).length; i++) {
@@ -61,7 +61,9 @@ const loadGUI = () => {
   cam_rotation.add(config, "camRotY", 0, 360, 1).name('Y');
   cam_rotation.add(config, "camRotZ", 0, 360, 1).name('Z');
 
-
+  const animaCam = gui.addFolder('Animaco Camera');
+  animaCam.add(config, "velDelta", 1, 10, 0.001).name('Delta T');
+  animaCam.add(config, 'animation').name('Animação');
   barDepthController.onChange(
     function (newValue) {
       config.camPosX=0;

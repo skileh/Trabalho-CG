@@ -7,4 +7,5 @@ var camSelect = 0;
 var isCreate = false;
 var isRemove = false;
 var camTrans;
-var animation;
+var animation = false;
+var rotation = degToRad(40);

@@ -35,6 +35,7 @@ void main() {
 }
 `;
 
+
 function main() {
   // Get A WebGL context
   /** @type {HTMLCanvasElement} */
@@ -85,31 +86,20 @@ function main() {
   var target = [0, 0, 0];
   var up = [0, 1, 0];
 
-  //
-  function computeMatrix(viewProjectionMatrix, translation, xRotation, yRotation, zRotation, xScale, yScale, zSacale) {
-    var matrix = m4.translate(viewProjectionMatrix,
-      translation[0],
-      translation[1],
-      translation[2]);
-    matrix = m4.scale(matrix, xScale, yScale, zSacale);
-    matrix = m4.xRotate(matrix, xRotation);
-    matrix = m4.zRotate(matrix, zRotation);
-    return m4.yRotate(matrix, yRotation);
-  }
-
+  
   var gui = loadGUI();
   requestAnimationFrame(drawScene);
-  // Draw the scene.
+  //variaveis calculo tempo
   var then = 0;
+  // Draw the scene.
   function drawScene(time,now) {
-    time = time * 0.0005;
     // Convert to seconds
-    now *= 0.001;
+    time = time * 0.001;
     // Subtract the previous time from the current time
-    var deltaTime = now - then;
+    var deltaTime = time - then;
     // Remember the current time for the next frame.
-    then = now;
-
+    then = time;
+    rotation += config.velDelta * deltaTime;
     twgl.resizeCanvasToDisplaySize(gl.canvas);
 
     // Tell WebGL how to convert from clip space to pixels
@@ -152,7 +142,7 @@ function main() {
     }
 
     // chamada da função calculo da camera
-    var cameraMatrix = camMatrix(cameraPosition, target, up, deltaTime);
+    var cameraMatrix = camMatrix(cameraPosition, target, up);
     // Make a view matrix from the camera matrix.
     var viewMatrix = m4.inverse(cameraMatrix);
 
