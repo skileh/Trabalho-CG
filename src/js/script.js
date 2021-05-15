@@ -91,6 +91,7 @@ function main() {
   requestAnimationFrame(drawScene);
   //variaveis calculo tempo
   var then = 0;
+  var rotationObj = degToRad(40);
   // Draw the scene.
   function drawScene(time,now) {
     // Convert to seconds
@@ -100,6 +101,7 @@ function main() {
     // Remember the current time for the next frame.
     then = time;
     rotation += config.velDelta * deltaTime;
+    rotationObj += config.objDelta * deltaTime;
     twgl.resizeCanvasToDisplaySize(gl.canvas);
 
     // Tell WebGL how to convert from clip space to pixels
@@ -114,9 +116,9 @@ function main() {
       m4.perspective(fieldOfViewRadians, aspect, 1, 2000);
 
     // Compute the camera's matrix using look at.
-    if (camCreate) {
-      cameraPosition.push([0, 0, 100])
-    }
+    //if (camCreate) {
+    //  cameraPosition.push([0, 0, 100])
+    //}
     refreshGUI(gui);
     cameraPosition[camSelect] = [
       config.camPosX,
@@ -148,6 +150,27 @@ function main() {
 
     var viewProjectionMatrix = m4.multiply(projectionMatrix, viewMatrix);
 
+    //animação objeto
+    if(isAnimate){
+      if(rotationObj<=10){
+        config.x_rotate=rotationObj;
+      }else if(rotationObj<=20){
+        config.x_rotate=rotationObj;
+        config.y_rotate=rotationObj;
+        config.z_rotate=rotationObj;
+
+      }else if(rotationObj<=40){
+        config.x_translation=rotationObj-20;
+        config.x_rotate=rotationObj;
+        config.y_rotate=rotationObj;
+      }else if(rotationObj<=50){
+        config.x_scale=(rotationObj-40)/10;
+        config.y_scale=(rotationObj-40)/10;
+      }else{
+        isAnimate=false;
+        rotationObj=degToRad(40);
+      }
+    }  
     // verifica se o slice de translação foi modificado
     if (coneTranslation[objectsToDraw.length - 1] != [
       config.x_translation,
@@ -253,6 +276,7 @@ function main() {
       c += 1;
     });
 
+    
     // Setup all the needed attributes.
     // desenha 1 cone \  malha que vai ser utilizada
     gl.bindVertexArray(coneVAOs);

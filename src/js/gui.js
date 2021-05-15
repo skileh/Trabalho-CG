@@ -6,7 +6,9 @@ var config = {
   camPosX: degToRad(0), camPosY: degToRad(0), camPosZ: degToRad(0),
   camBezier: degToRad(0), barDirection: degToRad(0),
   camRotX: degToRad(0), camRotY: degToRad(0), camRotZ: degToRad(0),
-  zoom: degToRad(0), velDelta:degToRad(0), animation:function(){ animation=true; }
+  objDelta:degToRad(0), aniObj:function(){ isAnimate=true; },
+  zoom: degToRad(0), 
+  velDelta:degToRad(0), animation:function(){ animation=true; }
 };
 
 var button1 = { Add_new_object: function () { isCreate = true; } };
@@ -30,20 +32,20 @@ const loadGUI = () => {
   gui.add(button2, 'remove_obj');
 
   const rotate = gui.addFolder('Rotação no Eixo Objeto');
-  rotate.add(config, "y_rotate", 0, 20, 0.5);
-  rotate.add(config, "x_rotate", 0, 20, 0.5);
-  rotate.add(config, "z_rotate", 0, 20, 0.5);
+  rotate.add(config, "y_rotate", 0, 20, 0.5).name('Y');
+  rotate.add(config, "x_rotate", 0, 20, 0.5).name('X');
+  rotate.add(config, "z_rotate", 0, 20, 0.5).name('Z');
 
   const translate = gui.addFolder('Translação Objeto');
-  translate.add(config, "y_translation", -100, 100, 0.5);
-  translate.add(config, "x_translation", -100, 100, 0.5);
-  translate.add(config, "z_translation", -100, 100, 0.5);
-  translate.add(config, "beizer_translation", 0, 1, 0.001);
+  translate.add(config, "y_translation", -100, 100, 0.5).name('Y');
+  translate.add(config, "x_translation", -100, 100, 0.5).name('X');
+  translate.add(config, "z_translation", -100, 100, 0.5).name('Z');
+  translate.add(config, "beizer_translation", 0, 1, 0.001).name('BEZIER');
 
   const scale = gui.addFolder('Escala Objeto');
-  scale.add(config, "y_scale", 0, 10, 0.01);
-  scale.add(config, "x_scale", 0, 10, 0.01);
-  scale.add(config, "z_scale", 0, 10, 0.01);
+  scale.add(config, "y_scale", 0, 10, 0.01).name('Y');
+  scale.add(config, "x_scale", 0, 10, 0.01).name('X');
+  scale.add(config, "z_scale", 0, 10, 0.01).name('Z');
 
   barDepthController = gui.add(config, 'barDirection',
     ['Translação','Look At objeto', 'Look At Ponto 0,0,0', 
@@ -60,6 +62,10 @@ const loadGUI = () => {
   cam_rotation.add(config, "camRotX", 0, 360, 1).name('X');
   cam_rotation.add(config, "camRotY", 0, 360, 1).name('Y');
   cam_rotation.add(config, "camRotZ", 0, 360, 1).name('Z');
+
+  const animaObj = gui.addFolder('Animaco Objeto');
+  animaObj.add(config, "objDelta", 1, 10, 0.001).name('Delta T');
+  animaObj.add(config, 'aniObj').name('Animação');
 
   const animaCam = gui.addFolder('Animaco Camera');
   animaCam.add(config, "velDelta", 1, 10, 0.001).name('Delta T');
