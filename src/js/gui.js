@@ -6,9 +6,9 @@ var config = {
   camPosX: degToRad(0), camPosY: degToRad(0), camPosZ: degToRad(0),
   camBezier: degToRad(0), barDirection: degToRad(0),
   camRotX: degToRad(0), camRotY: degToRad(0), camRotZ: degToRad(0),
-  objDelta:degToRad(0), aniObj:function(){ isAnimate=true; },
-  zoom: degToRad(0), 
-  velDelta:degToRad(0), animation:function(){ animation=true; }
+  objDelta: degToRad(0), aniObj: function () { isAnimate = true; },
+  zoom: degToRad(0),
+  velDelta: degToRad(0), animation: function () { animation = true; }
 };
 
 var button1 = { Add_new_object: function () { isCreate = true; } };
@@ -25,7 +25,7 @@ function refreshGUI(gui) {
 
 const loadGUI = () => {
   const gui = new dat.GUI();
-  config.zoom=1
+  config.zoom = 1
   gui.add(config, "zoom", 0.0001, 5, 0.0001);
 
   gui.add(button1, 'Add_new_object');
@@ -48,8 +48,8 @@ const loadGUI = () => {
   scale.add(config, "z_scale", 0, 10, 0.01).name('Z');
 
   barDepthController = gui.add(config, 'barDirection',
-    ['Translação','Look At objeto', 'Look At Ponto 0,0,0', 
-    'animação', 'Rotação Ponto','Rotação Eixo'])
+    ['Translação', 'Look At objeto', 'Look At Ponto 0,0,0',
+      'Rotação Ponto', 'Rotação Eixo'])
     .name('Objetivo Camêra')
     .listen();
   const cam_position = gui.addFolder('Camêra Translações');
@@ -72,29 +72,26 @@ const loadGUI = () => {
   animaCam.add(config, 'animation').name('Animação');
   barDepthController.onChange(
     function (newValue) {
-      config.camPosX=0;
-      config.camPosY=0;
+      config.camPosX = 0;
+      config.camPosY = 0;
       refreshGUI(gui)
-      if(newValue=='Translação'){
-        camTrans='Translação';
+      if (newValue == 'Translação') {
+        camTrans = 'Translação';
       }
-      else if(newValue=='Look At objeto'){
-        camTrans='Look At objeto';
+      else if (newValue == 'Look At objeto') {
+        camTrans = 'Look At objeto';
       }
-      else if(newValue=='Look At Ponto 0,0,0'){
-        camTrans='Look At Ponto 0,0,0';
+      else if (newValue == 'Look At Ponto 0,0,0') {
+        camTrans = 'Look At Ponto 0,0,0';
       }
-      else if(newValue=='animação'){
-        camTrans='animação';
+      else if (newValue == 'Rotação Ponto') {
+        camTrans = 'Rotação Ponto';
       }
-      else if(newValue=='Rotação Ponto'){
-        camTrans='Rotação Ponto';
+      else if (newValue == 'Rotação Eixo') {
+        camTrans = 'Rotação Eixo';
       }
-      else if(newValue=='Rotação Eixo'){
-        camTrans='Rotação Eixo';
-      }
-      else{
-       // console.log('error');
+      else {
+        // console.log('error');
       }
       //do whatever you want...
     });

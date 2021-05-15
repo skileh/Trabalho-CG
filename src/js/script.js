@@ -238,7 +238,8 @@ function main() {
         uniforms: coneUniformss,
       });
       isCreate = false;
-      console.log(objectsToDraw);
+     // console.log('objetos em cena')
+      //console.log(objectsToDraw);
     }
 
     if (isRemove) {

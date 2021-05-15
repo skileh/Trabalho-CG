@@ -24,9 +24,6 @@ function camMatrixNoAnimation(cameraPosition, target, up) {
     target = [0, 0, 0];
     cameraMatrix = m4.lookAt(cameraPosition[camSelect], target, up);
   }
-  else if (camTrans == 'animação') {
-    camTrans = 'animação';
-  }
   // faz uma matriz que gira a câmera em torno do raio de origem * 1,5 distância para fora e olhando para a origem.
   else if (camTrans == 'Rotação Ponto') {
     //gira em torno do ponto onde está o objeto selecionado
